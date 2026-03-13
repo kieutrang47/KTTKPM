@@ -1,0 +1,72 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api/v1
+
+spring:
+  aop:
+    auto: true
+    proxy-target-class: true
+
+resilience4j:
+  retry:
+    configs:
+      default:
+        max-attempts: 3
+        wait-duration: 1s
+        retry-exceptions:
+          - org.springframework.web.client.HttpServerErrorException  # HTTP 500 errors
+          - org.springframework.web.client.ResourceAccessException   # Network errors
+          - java.net.ConnectException                               # Connection errors
+          - org.springframework.web.client.HttpClientErrorException  # HTTP 4xx errors
+          - java.lang.Exception                                     # Catch-all (cho testing)
+        ignore-exceptions:
+          - java.lang.IllegalArgumentException                      # Không retry cho bad requests
+    instances:
+      serviceBRetry:
+        base-config: default
+        wait-duration: 1s  # Giảm thời gian chờ
+
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+    instances:
+      serviceBCircuitBreaker:
+        base-config: default
+
+  ratelimiter:
+    configs:
+      default:
+        limit-for-period: 5
+        limit-refresh-period: 60s
+        timeout-duration: 0s
+    instances:
+      serviceBRateLimiter:
+        base-config: default
+
+  bulkhead:
+    configs:
+      default:
+        max-concurrent-calls: 3
+        max-wait-duration: 0s
+    instances:
+      serviceBBulkhead:
+        base-config: default
+
+# Service B Configuration
+service:
+  b:
+    base-url: http://localhost:3001
+
+# Logging Configuration
+logging:
+  level:
+    iuh.servicea: INFO
+    io.github.resilience4j: DEBUG
+    org.springframework.web.client: DEBUG
+    org.springframework.aop: DEBUG
