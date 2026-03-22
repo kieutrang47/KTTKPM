@@ -1,0 +1,13 @@
+version: "3.8"
+services:
+  db_vol:
+    image: mysql:8.0
+    container_name: mysql_volume_bai10
+    ports:
+      - "3307:3306" # Dùng 3307 để né MariaDB 3306
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - my_data_bai10:/var/lib/mysql
+volumes:
+  my_data_bai10:

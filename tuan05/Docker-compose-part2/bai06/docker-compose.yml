@@ -1,0 +1,16 @@
+services:
+  wp_db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: wp_db
+  wordpress:
+    image: wordpress:latest
+    ports:
+      - "8082:80"
+    depends_on:
+      - wp_db
+    environment:
+      WORDPRESS_DB_HOST: wp_db
+      WORDPRESS_DB_PASSWORD: root
+    restart: always # Tự khởi động lại nếu bị lỗi 500

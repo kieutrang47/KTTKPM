@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  # --- Redis ---
+  redis_limited:
+    image: redis:7-alpine
+    container_name: redis_limit_bai15
+    ports:
+      - "6380:6379"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 256M
+        reservations:
+          memory: 128M

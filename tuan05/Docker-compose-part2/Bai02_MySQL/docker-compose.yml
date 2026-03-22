@@ -1,0 +1,13 @@
+version: "3.8"
+services:
+  db_mysql:
+    image: mysql:8.0
+    container_name: mysql_practice
+    environment:
+      MYSQL_ROOT_PASSWORD: password123
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3307:3306" # Dùng 3307 để né cổng 3306 của MariaDB cũ
+

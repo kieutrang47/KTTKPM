@@ -1,0 +1,17 @@
+version: "3.8"
+services:
+  flask_practice:
+    image: python:3.9-slim
+    container_name: flask_container_9
+    ports:
+      - "5005:5000"
+    command: |
+      sh -c "pip install flask && 
+      cat <<EOF > app.py
+      from flask import Flask
+      app = Flask(__name__)
+      @app.route('/')
+      def hello():
+          return '<h1>Hello Trang! Day la Bai 9 ne</h1>'
+      EOF
+      python -m flask run --host=0.0.0.0"

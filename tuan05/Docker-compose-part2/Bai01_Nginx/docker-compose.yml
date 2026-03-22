@@ -1,0 +1,7 @@
+version: "3.8"
+services:
+  web_nginx:
+    image: nginx:latest
+    container_name: nginx_practice
+    ports:
+      - "8080:80" # Máy Mac: 8080 -> Container: 80

@@ -1,0 +1,6 @@
+services:
+  redis_practice:
+    image: redis:alpine
+    container_name: redis_6381
+    ports:
+      - "6381:6379"

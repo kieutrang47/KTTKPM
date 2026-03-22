@@ -16,7 +16,7 @@ public class MainPayment {
         // 3. Thanh toán Thẻ vừa có Phí vừa có Giảm giá
         Payment payment3 = new CreditCardPayment();
         payment3 = new ProcessingFeeDecorator(payment3);
-        payment3 = new DiscountDecorator(payment3);    
+        payment3 = new DiscountDecorator(payment3);
         System.out.println("Đơn 3: " + payment3.getDescription() + " | Tổng: " + payment3.getCost());
     }
 }

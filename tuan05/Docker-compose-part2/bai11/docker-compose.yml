@@ -1,0 +1,24 @@
+version: "3.8"
+
+services:
+  # --- Database Postgres ---
+  pg_db:
+    image: postgres:15-alpine
+    container_name: postgres_bai11
+    environment:
+      POSTGRES_DB: mydb
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - ./init:/docker-entrypoint-initdb.d # Tự động chạy file SQL khi khởi tạo
+    ports:
+      - "5433:5432" # Vào database bằng localhost:5433
+
+  # --- Công cụ quản lý Adminer ---
+  adminer:
+    image: adminer:latest
+    container_name: adminer_web_bai11
+    ports:
+      - "8083:8080" # Vào web bằng localhost:8083
+    depends_on:
+      - pg_db

@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  redis_moi:
+    image: redis:7-alpine
+    container_name: redis_container_doan_moi
+    ports:
+      - "6380:6379" # Đổi cổng ngoài thành 6380 để tránh xung đột với Redis cũ
+    volumes:
+      - redis_data_moi:/data # Đổi tên Volume để tạo kho lưu trữ mới hoàn toàn
+    command: redis-server --appendonly yes --requirepass Redis123!@#
+    restart: unless-stopped
+    environment:
+      - REDIS_PASSWORD=Redis123!@#
+
+volumes:
+  redis_data_moi: # Khai báo tên Volume mới ở đây

@@ -1,0 +1,138 @@
+version: "3.8"
+
+services:
+  # --- BÀI 10: TRAEFIK (Người gác cổng) ---
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik_gateway
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80" # Truy cập web qua: localhost
+      - "8082:8080" # Dashboard xem hệ thống
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - dev_network
+
+  # --- BÀI 1: MYSQL ---
+  db_wp:
+    image: mysql:5.7
+    platform: linux/x86_64
+    container_name: mysql_wordpress_p3
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: wordpress_db
+    volumes:
+      - wp_db_data_final:/var/lib/mysql # Dùng volume mới hoàn toàn để sạch dữ liệu
+    networks:
+      - dev_network
+
+  # --- BÀI 1: WORDPRESS ---
+  wordpress:
+    image: wordpress:latest
+    container_name: wordpress_site_p3
+    depends_on:
+      - db_wp
+    labels:
+      - "traefik.http.routers.wp.rule=Host(`localhost`) || Host(`wordpress.localhost`)"
+      - "traefik.http.services.wp.loadbalancer.server.port=80"
+    environment:
+      WORDPRESS_DB_HOST: db_wp
+      WORDPRESS_DB_NAME: wordpress_db
+      WORDPRESS_DB_USER: root # THÊM DÒNG NÀY ĐỂ FIX LỖI 500
+      WORDPRESS_DB_PASSWORD: root_password
+    networks:
+      - dev_network
+
+  # --- BÀI 2: NODE.JS ---
+  node_app:
+    image: node:18-alpine
+    container_name: node_app_p3
+    working_dir: /app
+    volumes:
+      - ./node-app:/app
+    command: sh -c "npm install express && node app.js"
+    labels:
+      - "traefik.http.routers.node.rule=Host(`node.localhost`)"
+      - "traefik.http.services.node.loadbalancer.server.port=3000"
+    networks:
+      - dev_network
+
+  # --- BÀI 3: FLASK (Dùng 2 bản chạy song song) ---
+  flask_app:
+    build: ./flask-app
+    # Mentor bỏ container_name để Docker có thể tạo ra 2 bản (Replicas)
+    deploy:
+      replicas: 2
+    labels:
+      - "traefik.http.routers.flask.rule=Host(`flask.localhost`)"
+      - "traefik.http.services.flask.loadbalancer.server.port=5000"
+    networks:
+      - dev_network
+
+  # --- BÀI 4: MONITORING (Prometheus + Grafana) ---
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus_p3
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    labels:
+      - "traefik.http.routers.prom.rule=Host(`monitor.localhost`)"
+      - "traefik.http.services.prom.loadbalancer.server.port=9090"
+    networks:
+      - dev_network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana_p3
+    depends_on:
+      - prometheus
+    volumes:
+      - grafana_data:/var/lib/grafana
+    labels:
+      - "traefik.http.routers.grafana.rule=Host(`grafana.localhost`)"
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+    networks:
+      - dev_network
+
+  # --- BÀI 7: ELK STACK (Elasticsearch + Kibana) ---
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.10
+    container_name: elasticsearch_p3
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m" # Giới hạn RAM cho máy Mac đỡ nóng
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    labels:
+      - "traefik.http.routers.es.rule=Host(`elastic.localhost`)"
+      - "traefik.http.services.es.loadbalancer.server.port=9200"
+    networks:
+      - dev_network
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.10
+    container_name: kibana_p3
+    depends_on:
+      - elasticsearch
+    labels:
+      - "traefik.http.routers.kibana.rule=Host(`kibana.localhost`)"
+      - "traefik.http.services.kibana.loadbalancer.server.port=5601"
+    networks:
+      - dev_network
+
+# --- VOLUME ---
+volumes:
+  wp_db_data_final:
+  mongo_data:
+  prometheus_data:
+  grafana_data:
+  es_data:
+networks:
+  dev_network:
+    driver: bridge

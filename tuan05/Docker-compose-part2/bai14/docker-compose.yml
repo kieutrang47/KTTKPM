@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+  # --- Backend ---
+  srv_backend:
+    image: alpine
+    container_name: backend_bai14
+    command: sleep infinity 
+    networks:
+      - mang_noi_bo_do_an
+
+  # ---  Database  ---
+  srv_db:
+    image: alpine
+    container_name: db_bai14
+    command: sleep infinity
+    networks:
+      - mang_noi_bo_do_an
+
+# --- Khai báo (Network) ---
+networks:
+  mang_noi_bo_do_an:
+    driver: bridge

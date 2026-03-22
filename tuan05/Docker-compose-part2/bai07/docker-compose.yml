@@ -1,0 +1,9 @@
+services:
+  mongo_hoc:
+    image: mongo:latest
+  mongo_express:
+    image: mongo-express:latest
+    ports:
+      - "8085:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo_hoc

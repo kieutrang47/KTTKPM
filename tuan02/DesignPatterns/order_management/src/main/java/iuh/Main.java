@@ -11,7 +11,7 @@ public class Main {
         OrderContext context = new OrderContext(orderCuaLan);
 
         // 3. Quy trình bắt đầu chạy
-        context.proceed(); 
+        context.proceed();
 
         // 4.Lan gọi điện yêu cầu hủy đơn
         context.cancel();  // Hệ thống sẽ gọi đúng logic Hủy của trạng thái hiện tại

@@ -1,0 +1,12 @@
+services:
+  db_hoc:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+  phpmyadmin_hoc:
+    image: phpmyadmin:latest
+    container_name: pma_8081
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db_hoc

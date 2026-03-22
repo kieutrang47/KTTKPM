@@ -38,22 +38,23 @@ public class JwtFilter extends OncePerRequestFilter {
             try {
                 username = jwtUtil.extractUsername(token);
             } catch (Exception e) {
-                // Token lỗi định dạng hoặc hết hạn
+                // Token lỗi
             }
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            // 1. Kiểm tra chữ ký Token
             if (jwtUtil.validateToken(token)) {
 
-                // 2. Kiểm tra Redis xem có bị Blacklist không
+                // CHECK REDIS
                 if (redisService.isBlacklisted(token)) {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.getWriter().write("Token da bi vo hieu hoa (Logout)!");
-                    return; // Chặn ngay tại đây
+                    response.setContentType("application/json");
+                    response.setCharacterEncoding("UTF-8");
+                    // Trả về JSON lỗi thay vì String
+                    response.getWriter().write("{\"code\": 1009, \"message\": \"Token đã bị vô hiệu hóa (Logout)!\"}");
+                    return;
                 }
 
-                // Nếu sạch -> Cho qua
                 UserDetails userDetails = new User(username, "", new ArrayList<>());
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
