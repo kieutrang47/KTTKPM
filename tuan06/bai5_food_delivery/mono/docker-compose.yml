@@ -1,0 +1,40 @@
+version: "3.9"
+services:
+  app:
+    build: .
+    container_name: bai5_mono
+    ports: ["5001:3000"]
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DB_HOST=db
+      - DB_USER=postgres
+      - DB_PASSWORD=123456
+      - DB_NAME=fooddb
+    networks: [food_net]
+    restart: unless-stopped
+
+  db:
+    image: postgres:15-alpine
+    container_name: bai5_db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=fooddb
+    volumes:
+      - pgdata5:/var/lib/postgresql/data
+      - ../init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks: [food_net]
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  pgdata5:
+networks:
+  food_net:
+    driver: bridge

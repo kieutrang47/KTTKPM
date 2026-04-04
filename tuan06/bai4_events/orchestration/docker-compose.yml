@@ -1,0 +1,46 @@
+version: "3.9"
+
+# ORCHESTRATION: Orchestrator điều phối mọi bước
+#
+#  Client → Orchestrator(:4005)
+#                ├──→ order-service(:4006)
+#                ├──→ payment-service(:4007)
+#                └──→ notification-service(:4008)
+
+services:
+  orchestrator:
+    build: ./orchestrator
+    container_name: bai4_orchestrator
+    ports: ["4005:3000"]
+    environment:
+      - ORDER_SVC_URL=http://order-service:3000
+      - PAY_SVC_URL=http://payment-service:3000
+      - NOTIF_SVC_URL=http://notification-service:3000
+    depends_on: [order-service, payment-service, notification-service]
+    networks: [orch_net]
+    restart: unless-stopped
+
+  order-service:
+    build: ./order-service
+    container_name: bai4_order_o
+    ports: ["4006:3000"]
+    networks: [orch_net]
+    restart: unless-stopped
+
+  payment-service:
+    build: ./payment-service
+    container_name: bai4_payment_o
+    ports: ["4007:3000"]
+    networks: [orch_net]
+    restart: unless-stopped
+
+  notification-service:
+    build: ./notification-service
+    container_name: bai4_notif_o
+    ports: ["4008:3000"]
+    networks: [orch_net]
+    restart: unless-stopped
+
+networks:
+  orch_net:
+    driver: bridge

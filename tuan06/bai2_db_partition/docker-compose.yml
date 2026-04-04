@@ -1,0 +1,50 @@
+version: "3.9"
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    container_name: mssql_db
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=YourPassword123!
+      - SA_PASSWORD=YourPassword123!
+    volumes:
+      - sqlvolume:/var/opt/mssql
+      # Map file init SQL db
+      - ./db_partition.sql:/docker-entrypoint-initdb.d/db_partition.sql
+    restart: unless-stopped
+    
+  app:
+    build: .
+    container_name: spring_partition_app
+    ports:
+      - "8080:8080"
+    depends_on:
+      sqlserver:
+        condition: service_started
+      db_setup:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  db_setup:
+    image: mcr.microsoft.com/mssql-tools
+    container_name: mssql_db_setup
+    depends_on:
+      - sqlserver
+    volumes:
+      - ./db_partition.sql:/db_partition.sql
+    command: |
+      bash -c '
+      echo "Waiting for SQL Server..."
+      for i in {1..30}; do
+        /opt/mssql-tools/bin/sqlcmd -S mssql_db -U sa -P "YourPassword123!" -Q "SELECT 1" > /dev/null 2>&1 && break || sleep 2;
+      done
+      echo "SQL Server is ready! Initializing database..."
+      /opt/mssql-tools/bin/sqlcmd -S mssql_db -U sa -P "YourPassword123!" -Q "CREATE DATABASE partitiondb;"
+      /opt/mssql-tools/bin/sqlcmd -S mssql_db -U sa -P "YourPassword123!" -d partitiondb -i /db_partition.sql
+      '
+
+volumes:
+  sqlvolume:

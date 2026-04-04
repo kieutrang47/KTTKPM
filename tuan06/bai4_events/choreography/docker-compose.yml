@@ -1,0 +1,56 @@
+version: "3.9"
+
+# CHOREOGRAPHY: Mỗi service tự biết phản ứng với events
+# Không có ai chỉ huy - services giao tiếp qua Event Bus
+#
+#   Client → order-service → [EVENT_BUS] → payment-service
+#                          ←                      ↓ [PAYMENT_DONE]
+#             notification-service ←──────────────┘
+#
+# ÚU ĐIỂM: loose coupling, dễ thêm service mới
+# NHƯỢC ĐIỂM: khó debug flow, không có bức tranh tổng thể
+
+services:
+  event-bus:
+    build: ./event-bus
+    container_name: bai4_event_bus
+    ports: ["4001:3000"]
+    networks: [choreography_net]
+    restart: unless-stopped
+
+  order-service:
+    build: ./order-service
+    container_name: bai4_order_c
+    ports: ["4002:3000"]
+    environment:
+      - EVENT_BUS_URL=http://event-bus:3000
+      - MY_URL=http://order-service:3000
+    depends_on: [event-bus]
+    networks: [choreography_net]
+    restart: unless-stopped
+
+  payment-service:
+    build: ./payment-service
+    container_name: bai4_payment_c
+    ports: ["4003:3000"]
+    environment:
+      - EVENT_BUS_URL=http://event-bus:3000
+      - MY_URL=http://payment-service:3000
+    depends_on: [event-bus]
+    networks: [choreography_net]
+    restart: unless-stopped
+
+  notification-service:
+    build: ./notification-service
+    container_name: bai4_notif_c
+    ports: ["4004:3000"]
+    environment:
+      - EVENT_BUS_URL=http://event-bus:3000
+      - MY_URL=http://notification-service:3000
+    depends_on: [event-bus]
+    networks: [choreography_net]
+    restart: unless-stopped
+
+networks:
+  choreography_net:
+    driver: bridge

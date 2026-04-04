@@ -1,0 +1,93 @@
+version: "3.9"
+
+# SBA: 3 Services riêng biệt → 1 Shared DB
+# ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
+# │ user-service │  │product-svc  │  │ order-svc   │
+# │    :3004     │  │   :3005     │  │   :3006     │
+# └──────┬───────┘  └──────┬──────┘  └──────┬──────┘
+#        └─────────────────┴─────────────────┘
+#                         │
+#                  ┌──────▼──────┐
+#                  │  Shared DB  │
+#                  │   :5432     │
+#                  └─────────────┘
+
+services:
+  # ── USER SERVICE ─────────────────────────────────────────────
+  user-service:
+    build: ./user-service
+    container_name: bai3_user_svc
+    ports: ["3004:3000"]
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DB_HOST=db
+      - DB_USER=postgres
+      - DB_PASSWORD=123456
+      - DB_NAME=sbadb
+    networks: [sba_net]
+    restart: unless-stopped
+
+  # ── PRODUCT SERVICE ──────────────────────────────────────────
+  product-service:
+    build: ./product-service
+    container_name: bai3_product_svc
+    ports: ["3005:3000"]
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DB_HOST=db
+      - DB_USER=postgres
+      - DB_PASSWORD=123456
+      - DB_NAME=sbadb
+    networks: [sba_net]
+    restart: unless-stopped
+
+  # ── ORDER SERVICE ────────────────────────────────────────────
+  order-service:
+    build: ./order-service
+    container_name: bai3_order_svc
+    ports: ["3006:3000"]
+    depends_on:
+      db:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+      product-service:
+        condition: service_started
+    environment:
+      - DB_HOST=db
+      - DB_USER=postgres
+      - DB_PASSWORD=123456
+      - DB_NAME=sbadb
+      - USER_SERVICE_URL=http://user-service:3000
+      - PRODUCT_SERVICE_URL=http://product-service:3000
+    networks: [sba_net]
+    restart: unless-stopped
+
+  # ── SHARED DATABASE ──────────────────────────────────────────
+  db:
+    image: postgres:15-alpine
+    container_name: bai3_db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=sbadb
+    volumes:
+      - pgdata3:/var/lib/postgresql/data
+      - ../init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks: [sba_net]
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  pgdata3:
+networks:
+  sba_net:
+    driver: bridge

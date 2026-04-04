@@ -1,0 +1,88 @@
+version: "3.9"
+
+# ============================================================
+# GIẢI THÍCH CÁC KHÁI NIỆM DOCKER:
+#
+# VOLUME: lưu trữ dữ liệu bền vững ngoài container
+#   - Named volume (pgdata): Docker quản lý, không bị mất khi container xóa
+#   - Bind mount (./:/app):  map folder host vào container (dùng lúc dev)
+#
+# NETWORK: giao tiếp giữa các container
+#   - bridge (mặc định): các container trong cùng compose nói chuyện được
+#   - host: dùng network của host (Linux only)
+#   - overlay: dùng Swarm/Kubernetes
+#
+# LAYER (image layers):
+#   - Mỗi RUN/COPY/ADD tạo 1 layer mới (đọc-chỉ)
+#   - Container thêm 1 layer ghi lên trên
+#   - Chia sẻ layer giữa các image → tiết kiệm disk & download
+# ============================================================
+
+services:
+  # ── APP SERVICE ──────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.optimized    # dùng file tối ưu mới
+      target: production                  # chỉ build tới stage 'production'
+    image: food-app:1.0                   # đặt tên image sau khi build
+    container_name: node_app_optimized
+    ports:
+      - "3001:3000"
+    depends_on:
+      db:
+        condition: service_healthy        # chờ DB healthy thật sự
+    environment:
+      - DB_HOST=db
+      - DB_USER=postgres
+      - DB_PASSWORD=123456
+      - DB_NAME=testdb
+      - NODE_ENV=production
+    networks:
+      - app_network                       # gắn vào network riêng
+    # Bind mount chỉ dùng lúc DEV (hot-reload):
+    # volumes:
+    #   - ./src:/app/src
+    restart: unless-stopped
+    # Giới hạn tài nguyên → tránh container ăn hết CPU/RAM
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+
+  # ── DATABASE SERVICE ─────────────────────────────────────
+  db:
+    image: postgres:15-alpine             # alpine = nhỏ hơn ~200MB so với full
+    container_name: postgres_db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=testdb
+    volumes:
+      # Named volume → dữ liệu bền vững kể cả khi xóa container
+      - pgdata:/var/lib/postgresql/data
+      # Init script → chạy 1 lần khi DB tạo lần đầu
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - app_network
+    # Health check → app chỉ start sau khi DB thực sự sẵn sàng
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+# ── VOLUMES ──────────────────────────────────────────────────
+volumes:
+  pgdata:
+    driver: local
+    # Lưu tại: /var/lib/docker/volumes/pgdata/_data (trên host)
+
+# ── NETWORKS ─────────────────────────────────────────────────
+networks:
+  app_network:
+    driver: bridge
+    # Các service trong cùng network gọi nhau bằng tên service (db, app)
+    # Không expose ra ngoài internet trừ khi có port mapping

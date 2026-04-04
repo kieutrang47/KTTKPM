@@ -1,0 +1,68 @@
+version: "3.9"
+
+services:
+  user-service:
+    build: ./user-service
+    container_name: bai5_user_svc
+    ports: ["5002:3000"]
+    environment:
+      - DB_HOST=db
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [food_sba_net]
+    restart: unless-stopped
+
+  menu-service:
+    build: ./menu-service
+    container_name: bai5_menu_svc
+    ports: ["5003:3000"]
+    environment:
+      - DB_HOST=db
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [food_sba_net]
+    restart: unless-stopped
+
+  order-service:
+    build: ./order-service
+    container_name: bai5_order_svc
+    ports: ["5004:3000"]
+    environment:
+      - DB_HOST=db
+      - USER_SVC_URL=http://user-service:3000
+      - MENU_SVC_URL=http://menu-service:3000
+    depends_on:
+      db:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+      menu-service:
+        condition: service_started
+    networks: [food_sba_net]
+    restart: unless-stopped
+
+  db:
+    image: postgres:15-alpine
+    container_name: bai5_sba_db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=fooddb
+    volumes:
+      - pgdata_food_sba:/var/lib/postgresql/data
+      - ../init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks: [food_sba_net]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  pgdata_food_sba:
+networks:
+  food_sba_net:
+    driver: bridge

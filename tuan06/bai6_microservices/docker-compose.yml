@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: mpart1_rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  customer-db:
+    image: postgres:15-alpine
+    container_name: mpart1_customer_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: customer_db
+    ports:
+      - "5431:5432"
+
+  product-db:
+    image: postgres:15-alpine
+    container_name: mpart1_product_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: product_db
+    ports:
+      - "5432:5432"
+
+  order-db:
+    image: postgres:15-alpine
+    container_name: mpart1_order_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: order_db
+    ports:
+      - "5433:5432"
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: mpart1_gateway
+    ports:
+      - "8000:8000"
+    depends_on:
+      - customer-service
+      - product-service
+      - order-service
+
+  customer-service:
+    build: ./customer-service
+    container_name: mpart1_customer_service
+    environment:
+      - DB_HOST=customer-db
+    depends_on:
+      - customer-db
+
+  product-service:
+    build: ./product-service
+    container_name: mpart1_product_service
+    environment:
+      - DB_HOST=product-db
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+    depends_on:
+      - product-db
+      - rabbitmq
+
+  order-service:
+    build: ./order-service
+    container_name: mpart1_order_service
+    environment:
+      - DB_HOST=order-db
+      - CUSTOMER_SVC_URL=http://customer-service:3003
+      - PRODUCT_SVC_URL=http://product-service:3001
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+    depends_on:
+      - order-db
+      - customer-service
+      - product-service
+      - rabbitmq

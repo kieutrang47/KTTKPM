@@ -1,0 +1,71 @@
+# ============================================================
+# DOCKERFILE TỐI ƯU - BÀI 1: IMAGE OPTIMIZATION
+# ============================================================
+# Giải thích từng lệnh:
+#
+#   FROM   → chọn base image. Dùng alpine = nhỏ nhất (~5MB)
+#   WORKDIR→ đặt thư mục làm việc bên trong container
+#   COPY   → copy file từ host vào container
+#   RUN    → chạy lệnh lúc BUILD image (tạo layer mới)
+#   ENV    → set biến môi trường (tồn tại lúc runtime)
+#   EXPOSE → khai báo port (chỉ tài liệu, không mở thật)
+#   CMD    → lệnh mặc định khi container START (có thể override)
+#   ENTRYPOINT → lệnh chính, không bị override dễ dàng
+#
+# KHÁC NHAU CMD vs ENTRYPOINT:
+#   CMD ["node","src/index.js"]  → docker run ... python app.py (override được)
+#   ENTRYPOINT ["node"]          → docker run ... src/index.js  (thêm vào sau)
+#   Dùng cả 2: ENTRYPOINT=lệnh chính, CMD=tham số mặc định
+# ============================================================
+
+# ---- STAGE 1: BUILD (chỉ tồn tại lúc build, không vào image cuối) ----
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+
+# Copy package trước → Docker cache layer này nếu không đổi dependencies
+COPY package*.json ./
+
+# RUN tạo ra 1 layer; gộp nhiều lệnh bằng && để giảm số layer
+RUN npm install --only=production && \
+    npm cache clean --force
+
+# Copy source code sau (thay đổi thường xuyên hơn → đặt sau để tận dụng cache)
+COPY src/ ./src/
+
+# ---- STAGE 2: PRODUCTION (image cuối nhỏ gọn) ----
+FROM node:18-alpine AS production
+
+# Metadata
+LABEL maintainer="tuan06-student"
+LABEL version="1.0"
+
+WORKDIR /app
+
+# Tạo user non-root → bảo mật tốt hơn
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+# Chỉ copy từ stage builder ra → không kéo theo devDependencies, cache npm,...
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/src ./src
+COPY --from=builder /app/package.json ./
+
+# Biến môi trường mặc định
+ENV NODE_ENV=production
+ENV PORT=3000
+
+# Dùng user non-root
+USER appuser
+
+EXPOSE 3000
+
+# ENTRYPOINT cố định lệnh chạy, CMD cung cấp tham số mặc định
+ENTRYPOINT ["node"]
+CMD ["src/index.js"]
+
+# ============================================================
+# SO SÁNH KÍCH THƯỚC IMAGE:
+#   node:18           → ~900MB
+#   node:18-alpine    → ~170MB  
+#   multi-stage alpine→ ~120MB  ← image này
+# ============================================================

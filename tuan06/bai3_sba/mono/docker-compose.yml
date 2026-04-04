@@ -1,0 +1,40 @@
+version: "3.9"
+services:
+  mono:
+    build: .
+    container_name: bai3_mono
+    ports: ["3003:3000"]
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DB_HOST=db
+      - DB_USER=postgres
+      - DB_PASSWORD=123456
+      - DB_NAME=sbadb
+    networks: [sba_net]
+    restart: unless-stopped
+
+  db:
+    image: postgres:15-alpine
+    container_name: bai3_db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=sbadb
+    volumes:
+      - pgdata3:/var/lib/postgresql/data
+      - ../init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks: [sba_net]
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  pgdata3:
+networks:
+  sba_net:
+    driver: bridge
