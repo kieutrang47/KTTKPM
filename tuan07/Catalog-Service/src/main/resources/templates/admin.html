@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin - Quản Lý Thực Đơn</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+        .form-container { background: #f9f9f9; padding: 15px; border: 1px solid #ddd; border-radius: 5px;}
+        button { cursor: pointer; padding: 5px 10px; }
+    </style>
+</head>
+<body>
+<h2>Hệ Thống Quản Lý Thực Đơn (Admin - Port 8081)</h2>
+
+<div class="form-container">
+    <h3>Thêm Món Mới</h3>
+    <form action="/admin/add" method="post">
+        <label>Tên món:</label>
+        <input type="text" name="name" placeholder="VD: Trà Đào" required>
+
+        <label style="margin-left: 20px;">Giá tiền:</label>
+        <input type="number" name="price" placeholder="VD: 25000" required>
+
+        <button type="submit" style="margin-left: 20px; background-color: #28a745; color: white; border: none;">Thêm Món</button>
+    </form>
+</div>
+
+<table>
+    <tr style="background-color: #eee;">
+        <th>ID</th>
+        <th>Thông Tin Món Ăn (Có thể sửa trực tiếp)</th>
+        <th>Hành Động</th>
+    </tr>
+    <tr th:each="m : ${menu}">
+        <td th:text="${m.id}" style="font-weight: bold;"></td>
+
+        <td>
+            <form action="/admin/update" method="post" style="display: flex; gap: 10px;">
+                <input type="hidden" name="id" th:value="${m.id}">
+                <input type="text" name="name" th:value="${m.name}" required>
+                <input type="number" name="price" th:value="${m.price}" required>
+                <button type="submit" style="color: blue; border: 1px solid blue; background: none;">Lưu</button>
+            </form>
+        </td>
+
+        <td style="text-align: center;">
+            <form th:action="@{/admin/delete/{id}(id=${m.id})}" method="post">
+                <button type="submit" style="color: white; background-color: #dc3545; border: none;"
+                        onclick="return confirm('Bạn có chắc chắn muốn xóa món này khỏi thực đơn không?');">
+                    Xóa
+                </button>
+            </form>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

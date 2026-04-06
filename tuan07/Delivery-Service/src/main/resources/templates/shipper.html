@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Shipper - Giao Hàng (8083)</title>
+    <meta http-equiv="refresh" content="5">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 25px 35px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        p {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            font-style: italic;
+            display: flex;
+            align-items: center;
+        }
+        p::before {
+            content: "↻";
+            margin-right: 5px;
+            font-size: 1.2em;
+            color: #3498db;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 0.5px;
+        }
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Màn Hình Shipper - Port 8083</h2>
+    <p>Trang sẽ tự động làm mới để cập nhật đơn hàng...</p>
+    <table>
+        <tr>
+            <th>ID Đơn</th>
+            <th>Khách Hàng</th>
+            <th>Món</th>
+            <th>Trạng Thái</th>
+        </tr>
+        <tr th:each="o : ${orders}">
+            <td th:text="${'#' + o.id}" style="font-weight: bold; color: #2c3e50;"></td>
+            <td th:text="${o.customerName}"></td>
+            <td th:text="${o.foodItem}"></td>
+            <td>
+                <span th:text="${o.status}"
+                      th:style="${o.status == 'DELIVERING' ? 'background-color: #ffeaa7; color: #d35400; padding: 5px 10px; border-radius: 20px; font-size: 0.85em; font-weight: bold;' : 'background-color: #ecf0f1; color: #7f8c8d; padding: 5px 10px; border-radius: 20px; font-size: 0.85em; font-weight: bold;'}">
+                </span>
+            </td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>

@@ -1,0 +1,10 @@
+INSERT INTO menu_items (name, price) VALUES ('Cơm Sườn Bì Chả', 45000);
+INSERT INTO menu_items (name, price) VALUES ('Bún Bò Huế Đặc Biệt', 55000);
+INSERT INTO menu_items (name, price) VALUES ('Mì Quảng Ếch', 40000);
+INSERT INTO menu_items (name, price) VALUES ('Phở Bò Tái Nạm', 50000);
+INSERT INTO menu_items (name, price) VALUES ('Trà Sữa Trân Châu Đường Đen', 35000);
+INSERT INTO menu_items (name, price) VALUES ('Trà Đào Cam Sả', 30000);
+INSERT INTO menu_items (name, price) VALUES ('Gà Rán Sốt Cay Hàn Quốc', 85000);
+INSERT INTO menu_items (name, price) VALUES ('Pizza Hải Sản Cỡ Vừa', 120000);
+INSERT INTO menu_items (name, price) VALUES ('Kimbap Chiên Xù', 45000);
+INSERT INTO menu_items (name, price) VALUES ('Sinh Tố Bơ', 25000);
