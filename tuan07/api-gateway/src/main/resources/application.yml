@@ -1,0 +1,97 @@
+server:
+  port: 8080 # Cổng của API Gateway. Frontend sẽ gọi vào cổng này.
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      # 1. CẤU HÌNH CORS CHO FRONTEND
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*" # Hoặc thay bằng IP máy Frontend (VD: http://192.168.1.100:3000)
+            allowedMethods: "*"
+            allowedHeaders: "*"
+
+      routes:
+        # 2. ROUTE CHO USER SERVICE
+        - id: user-service
+          uri: lb://user-service # lb:// nghĩa là sử dụng Load Balancer
+          predicates:
+            - Path=/users/**, /register, /login
+          filters:
+            - name: Retry # 3. CẤU HÌNH RETRY
+              args:
+                retries: 3 # Thử lại 3 lần
+                statuses: BAD_GATEWAY, INTERNAL_SERVER_ERROR, GATEWAY_TIMEOUT
+                methods: GET, POST
+                backoff:
+                  firstBackoff: 100ms
+                  maxBackoff: 500ms
+                  factor: 2
+                  basedOnPreviousValue: false
+
+        # 3. ROUTE CHO FOOD SERVICE
+        - id: food-service
+          uri: lb://food-service
+          predicates:
+            - Path=/foods/**
+          filters:
+            - name: Retry
+              args:
+                retries: 3
+                statuses: BAD_GATEWAY, INTERNAL_SERVER_ERROR, GATEWAY_TIMEOUT
+
+        # 4. ROUTE CHO ORDER SERVICE
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/orders/**
+          filters:
+            - name: Retry
+              args:
+                retries: 3
+                statuses: BAD_GATEWAY, GATEWAY_TIMEOUT
+
+        # 5. ROUTE CHO PAYMENT SERVICE
+        - id: payment-service
+          uri: lb://payment-service
+          predicates:
+            - Path=/payments/**
+
+    # 4. CẤU HÌNH LOAD BALANCING GIẢ LẬP (Không cần Eureka)
+    # Khai báo IP LAN thực tế của từng người trong nhóm ở đây
+    discovery:
+      client:
+        simple:
+          instances:
+#            user-service:
+#              - uri: http://192.168.1.101:8081 # Thay bằng IP máy người số 2
+#              # - uri: http://192.168.1.102:8081 # Bỏ comment dòng này nếu muốn test Round Robin (chạy 2 instance user-service)
+#            food-service:
+#              - uri: http://192.168.1.103:8082 # Thay bằng IP máy người số 3
+#            order-service:
+#              - uri: http://192.168.1.104:8083 # Thay bằng IP máy người số 4
+#            payment-service:
+#              - uri: http://192.168.1.105:8084 # Thay bằng IP máy người số 5
+
+            # localhost:
+            user-service:
+              - uri: http://localhost:8081 # Thay bằng IP máy người số 2
+              - uri: http://localhost:8085 # Bản clone test Round robin
+              # - uri: http://192.168.1.102:8081 # Bỏ comment dòng này nếu muốn test Round Robin (chạy 2 instance user-service)
+            food-service:
+              - uri: http://localhost:8082 # Thay bằng IP máy người số 3
+            order-service:
+              - uri: http://localhost:8083 # Thay bằng IP máy người số 4
+            payment-service:
+              - uri: http://localhost:8084 # Thay bằng IP máy người số 5
+
+
+
+# Cấu hình log để dễ debug khi làm việc nhóm
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    root: INFO

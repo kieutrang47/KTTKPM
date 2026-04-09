@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@CrossOrigin(origins = "*") // Cho phép React gọi
+//@CrossOrigin(origins = "*") // Cho phép React gọi
 @RequestMapping("/payments")
 public class DeliveryController {
 
