@@ -10,7 +10,7 @@ function Login({ setUser }) {
   const [isLoginMode, setIsLoginMode] = useState(true);
   const navigate = useNavigate();
 
-  const USER_API = import.meta.env.VITE_USER_API_URL || 'http://localhost:8081/users';
+  const USER_API = import.meta.env.VITE_USER_API_URL || 'http://192.168.137.235:8081/users';
 
   const handleSubmit = async (e) => {
     e.preventDefault();

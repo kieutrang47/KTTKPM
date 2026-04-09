@@ -6,7 +6,7 @@ function Menu({ addToCart, user }) {
   const [loading, setLoading] = useState(true);
   const [newFood, setNewFood] = useState({ name: '', price: '' });
 
-  const FOOD_API = import.meta.env.VITE_FOOD_API_URL || 'http://localhost:8082/foods';
+  const FOOD_API = import.meta.env.VITE_FOOD_API_URL || 'http://192.168.137.122:8082/foods';
 
   const fetchMenu = () => {
     axios.get(FOOD_API)

@@ -7,7 +7,7 @@ function Cart({ cart, user, clearCart }) {
   const [successMsg, setSuccessMsg] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('COD');
   
-  const ORDER_API = import.meta.env.VITE_ORDER_API_URL || 'http://localhost:8083/orders';
+  const ORDER_API = import.meta.env.VITE_ORDER_API_URL || 'http://192.168.137.122:8083/orders';
 
   const handleCheckout = async () => {
     if (!user) {
