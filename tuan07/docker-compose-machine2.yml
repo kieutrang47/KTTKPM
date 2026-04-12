@@ -1,0 +1,21 @@
+# Docker Compose cho MÁY 2 (Catalog Service)
+
+version: '3.8'
+
+services:
+  # Catalog Service - Port 8082
+  catalog-service:
+    build:
+      context: ./Catalog-Service
+      dockerfile: Dockerfile
+    container_name: catalog-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:h2:file:/data/food_sba_db;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1
+    volumes:
+      - catalog-data:/data
+    restart: unless-stopped
+
+volumes:
+  catalog-data:

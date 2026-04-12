@@ -21,14 +21,20 @@ function Cart({ cart, user, clearCart }) {
     setSuccessMsg(null);
 
     try {
-      for (const item of cart) {
-        await axios.post(ORDER_API, {
-          customerName: user.username,
-          foodItem: item.name,
-          price: Number(item.price),
-          paymentMethod: paymentMethod
-        });
-      }
+      // ✅ Gửi 1 request duy nhất với tất cả items
+      const orderItems = cart.map(item => ({
+        foodItem: item.name,
+        quantity: 1,
+        price: Number(item.price),
+        subtotal: Number(item.price)
+      }));
+
+      await axios.post(ORDER_API, {
+        customerName: user.username,
+        items: orderItems,
+        paymentMethod: paymentMethod
+      });
+
       setSuccessMsg(`Procurement successful via ${paymentMethod}.`);
       clearCart();
     } catch (err) {

@@ -1,0 +1,40 @@
+version: "3.8"
+
+# MÁY CHÍNH (Nắm giữ Cổng giao tiếp, CSDL nội bộ và User)
+services:
+  redis:
+    image: redis:alpine
+    container_name: redis-broker
+    ports:
+      - "6379:6379"
+
+  user-service:
+    build: ../User-Service
+    container_name: user-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+
+  api-gateway:
+    build: ../api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      # Nội bộ máy A
+      - USER_SERVICE_URL=http://user-service:8081
+      # Cổ cổng sang IP mạng LAN của 2 máy bạn kia
+      - CATALOG_SERVICE_URL=http://${IP_MAY_B}:8082
+      - ORDER_SERVICE_URL=http://${IP_MAY_B}:8083
+      - PAYMENT_SERVICE_URL=http://${IP_MAY_C}:8084
+    depends_on:
+      - user-service
+
+  frontend:
+    build: ../frontend
+    container_name: frontend-ui
+    ports:
+      - "3000:80"
+    depends_on:
+      - api-gateway

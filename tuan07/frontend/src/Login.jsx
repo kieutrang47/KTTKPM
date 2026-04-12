@@ -30,9 +30,14 @@ function Login({ setUser }) {
     try {
       const res = await axios.post(`${USER_API}/login`, { username, password });
       setUser(res.data);
-      navigate('/');
+      // Redirect admin to admin dashboard, regular users to menu
+      if (res.data.role === 'ADMIN') {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
     } catch (err) {
-      alert('Authentication error. Verify your credentials.');
+      alert('Đăng nhập thất bại. Vui lòng kiểm tra lại tài khoản hoặc mật khẩu.');
     } finally {
       setIsLoading(false);
     }
@@ -42,12 +47,12 @@ function Login({ setUser }) {
     setIsLoading(true);
     try {
       await axios.post(`${USER_API}/register`, { username, password, role: 'USER' });
-      alert('Account allocated successfully. Please proceed to authenticate.');
+      alert('Tạo tài khoản thành công! Vui lòng đăng nhập.');
       setIsLoginMode(true);
       setPassword('');
       setConfirmPassword('');
     } catch (err) {
-      alert('Allocation error. Identity may already be registered.');
+      alert('Lỗi đăng ký. Tài khoản này có thể đã tồn tại.');
     } finally {
       setIsLoading(false);
     }
@@ -57,26 +62,26 @@ function Login({ setUser }) {
     <div className="max-w-sm mx-auto mt-16 p-8">
       <div className="mb-10 border-b border-slate-100 pb-8">
         <h3 className="text-2xl font-light tracking-tight text-slate-900">
-          {isLoginMode ? 'Sign In.' : 'Create Account.'}
+          {isLoginMode ? 'Đăng Nhập.' : 'Tạo Tài Khoản.'}
         </h3>
         <p className="text-slate-400 text-xs mt-3 uppercase tracking-widest font-medium">
-          {isLoginMode ? 'Enter credentials to proceed' : 'Establish your identity'}
+          {isLoginMode ? 'Nhập thông tin để tiếp tục' : 'Bắt đầu sử dụng hệ thống'}
         </p>
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">Identity</label>
+          <label className="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">Tên Đăng Nhập</label>
           <input 
             value={username} 
             onChange={e => setUsername(e.target.value)} 
-            placeholder="Username" 
+            placeholder="Nhập tên đăng nhập" 
             required 
             className="w-full px-4 py-3 border-b border-slate-200 bg-transparent text-sm focus:border-slate-800 focus:outline-none transition-colors"
           />
         </div>
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">VerificationKey</label>
+          <label className="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">Mật Khẩu</label>
           <input 
             type="password" 
             value={password} 
@@ -89,7 +94,7 @@ function Login({ setUser }) {
         
         {!isLoginMode && (
           <div className="animate-in slide-in-from-top-4 duration-300">
-            <label className="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">Confirm Key</label>
+            <label className="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">Xác Nhận Mật Khẩu</label>
             <input 
               type="password" 
               value={confirmPassword} 
@@ -105,9 +110,9 @@ function Login({ setUser }) {
           <button 
             type="submit" 
             disabled={isLoading}
-            className="w-full bg-slate-900 hover:bg-slate-800 text-white text-sm uppercase tracking-widest font-semibold py-4 rounded-md transition-colors"
+            className="w-full bg-slate-900 hover:bg-slate-800 text-white text-sm uppercase tracking-widest font-semibold py-4 rounded-md transition-colors shadow-sm"
           >
-            {isLoading ? 'Processing' : (isLoginMode ? 'Authenticate' : 'Register')}
+            {isLoading ? 'Đang xử lý...' : (isLoginMode ? 'Vào Hệ Thống' : 'Đăng Ký Ngay')}
           </button>
         </div>
 
@@ -117,7 +122,7 @@ function Login({ setUser }) {
             onClick={() => setIsLoginMode(!isLoginMode)}
             className="text-slate-500 hover:text-slate-900 text-xs font-semibold uppercase tracking-widest transition-colors"
           >
-            {isLoginMode ? "No account? Establish one." : "Have an account? Sign in."}
+            {isLoginMode ? "Chưa có tài khoản? Đăng ký ngay." : "Đã có tài khoản? Quay về đăng nhập."}
           </button>
         </div>
       </form>

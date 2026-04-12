@@ -1,0 +1,64 @@
+# Docker Compose cho MÁY 1 (User Service + Redis + Frontend)
+# Thay đổi IP theo máy thực tế của bạn
+
+version: '3.8'
+
+services:
+  # Redis - Message Broker
+  redis:
+    image: redis:7-alpine
+    container_name: food-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - food-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # User Service - Port 8081
+  user-service:
+    build:
+      context: ./User-Service
+      dockerfile: Dockerfile
+    container_name: user-service
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:h2:file:/data/user_sba_db;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1
+    volumes:
+      - user-data:/data
+    networks:
+      - food-network
+    restart: unless-stopped
+
+  # Frontend - Port 3000
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "3000:80"
+    environment:
+      # ⚠️ THAY ĐỔI IP THEO MÁY THỰC TẾ CỦA BẠN
+      - VITE_USER_API_URL=http://192.168.1.10:8081/users
+      - VITE_CATALOG_API_URL=http://192.168.1.11:8082/menu
+      - VITE_ORDER_API_URL=http://192.168.1.12:8083/orders
+      - VITE_PAYMENT_API_URL=http://192.168.1.12:8084/payments
+    networks:
+      - food-network
+    restart: unless-stopped
+    depends_on:
+      - user-service
+      - redis
+
+networks:
+  food-network:
+    driver: bridge
+
+volumes:
+  user-data:

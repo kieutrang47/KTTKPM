@@ -1,0 +1,240 @@
+version: '3.8'
+
+# Production Docker Compose Configuration
+# Includes: resource limits, restart policies, logging
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: food-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - food-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  user-service:
+    build:
+      context: ./User-Service
+      dockerfile: Dockerfile
+    container_name: user-service
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:h2:file:/data/user_sba_db;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1
+      - JAVA_OPTS=-Xmx256m -Xms128m
+    volumes:
+      - user-data:/data
+    networks:
+      - food-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8081/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  catalog-service:
+    build:
+      context: ./Catalog-Service
+      dockerfile: Dockerfile
+    container_name: catalog-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:h2:file:/data/food_sba_db;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1
+      - JAVA_OPTS=-Xmx256m -Xms128m
+    volumes:
+      - catalog-data:/data
+    networks:
+      - food-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8082/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  order-service:
+    build:
+      context: ./Order-Service
+      dockerfile: Dockerfile
+    container_name: order-service
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:h2:file:/data/order_sba_db;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - FOOD_SERVICE_URL=http://catalog-service:8082
+      - USER_SERVICE_URL=http://user-service:8081
+      - PAYMENT_SERVICE_URL=http://payment-service:8084
+      - JAVA_OPTS=-Xmx512m -Xms256m
+    volumes:
+      - order-data:/data
+    networks:
+      - food-network
+    depends_on:
+      redis:
+        condition: service_healthy
+      catalog-service:
+        condition: service_started
+      user-service:
+        condition: service_started
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 768M
+        reservations:
+          cpus: '0.75'
+          memory: 384M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8083/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  payment-service:
+    build:
+      context: ./Payment-Service
+      dockerfile: Dockerfile
+    container_name: payment-service
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:h2:file:/data/payment_sba_db;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - ORDER_SERVICE_URL=http://order-service:8083
+      - JAVA_OPTS=-Xmx256m -Xms128m
+    volumes:
+      - payment-data:/data
+    networks:
+      - food-network
+    depends_on:
+      redis:
+        condition: service_healthy
+      order-service:
+        condition: service_started
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8084/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_USER_API_URL=http://localhost:8081/users
+      - VITE_CATALOG_API_URL=http://localhost:8082/menu
+      - VITE_ORDER_API_URL=http://localhost:8083/orders
+      - VITE_PAYMENT_API_URL=http://localhost:8084/payments
+    networks:
+      - food-network
+    depends_on:
+      - user-service
+      - catalog-service
+      - order-service
+      - payment-service
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  food-network:
+    driver: bridge
+
+volumes:
+  user-data:
+    driver: local
+  catalog-data:
+    driver: local
+  order-data:
+    driver: local
+  payment-data:
+    driver: local

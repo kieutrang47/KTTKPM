@@ -1,0 +1,151 @@
+version: '3.8'
+
+services:
+  # Redis - Message Broker cho Order và Payment Service
+  redis:
+    image: redis:7-alpine
+    container_name: food-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - food-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # User Service - Port 8081
+  user-service:
+    build:
+      context: ./User-Service
+      dockerfile: Dockerfile
+    container_name: user-service
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:h2:file:/data/user_sba_db;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1
+    volumes:
+      - user-data:/data
+    networks:
+      - food-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8081/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Catalog Service (Food Service) - Port 8082
+  catalog-service:
+    build:
+      context: ./Catalog-Service
+      dockerfile: Dockerfile
+    container_name: catalog-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:h2:file:/data/food_sba_db;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1
+    volumes:
+      - catalog-data:/data
+    networks:
+      - food-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8082/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Order Service - Port 8083
+  order-service:
+    build:
+      context: ./Order-Service
+      dockerfile: Dockerfile
+    container_name: order-service
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:h2:file:/data/order_sba_db;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - FOOD_SERVICE_URL=http://catalog-service:8082
+      - USER_SERVICE_URL=http://user-service:8081
+      - PAYMENT_SERVICE_URL=http://payment-service:8084
+    volumes:
+      - order-data:/data
+    networks:
+      - food-network
+    depends_on:
+      redis:
+        condition: service_healthy
+      catalog-service:
+        condition: service_started
+      user-service:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8083/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Payment Service - Port 8084
+  payment-service:
+    build:
+      context: ./Payment-Service
+      dockerfile: Dockerfile
+    container_name: payment-service
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:h2:file:/data/payment_sba_db;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - ORDER_SERVICE_URL=http://order-service:8083
+    volumes:
+      - payment-data:/data
+    networks:
+      - food-network
+    depends_on:
+      redis:
+        condition: service_healthy
+      order-service:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8084/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend - React + Nginx
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_USER_API_URL=http://localhost:8081/users
+      - VITE_CATALOG_API_URL=http://localhost:8082/menu
+      - VITE_ORDER_API_URL=http://localhost:8083/orders
+      - VITE_PAYMENT_API_URL=http://localhost:8084/payments
+    networks:
+      - food-network
+    depends_on:
+      - user-service
+      - catalog-service
+      - order-service
+      - payment-service
+
+networks:
+  food-network:
+    driver: bridge
+
+volumes:
+  user-data:
+  catalog-data:
+  order-data:
+  payment-data:

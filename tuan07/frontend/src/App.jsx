@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Login from './Login';
 import Menu from './Menu';
 import Cart from './Cart';
+import Admin from './Admin';
 import './index.css';
 
 function App() {
@@ -26,6 +27,12 @@ function App() {
             
             <div className="flex items-center gap-2 sm:gap-6">
               <Link to="/" className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest px-3">Menu</Link>
+              
+              {user && user.role === 'ADMIN' && (
+                <Link to="/admin" className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest px-3">
+                  Admin
+                </Link>
+              )}
               
               {(!user || user.role !== 'ADMIN') && (
                 <Link to="/cart" className="relative text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest px-3 flex items-center gap-2">
@@ -60,6 +67,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Menu addToCart={addToCart} user={user} />} />
               <Route path="/cart" element={<Cart cart={cart} user={user} clearCart={clearCart} />} />
+              <Route path="/admin" element={<Admin user={user} />} />
               <Route path="/login" element={<Login setUser={setUser} />} />
             </Routes>
           </main>

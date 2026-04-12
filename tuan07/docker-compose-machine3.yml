@@ -1,0 +1,50 @@
+# Docker Compose cho MÁY 3 (Order Service + Payment Service)
+# Thay đổi IP theo máy thực tế của bạn
+
+version: '3.8'
+
+services:
+  # Order Service - Port 8083
+  order-service:
+    build:
+      context: ./Order-Service
+      dockerfile: Dockerfile
+    container_name: order-service
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:h2:file:/data/order_sba_db;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1
+      # ⚠️ THAY ĐỔI IP THEO MÁY 1 (Redis)
+      - SPRING_DATA_REDIS_HOST=192.168.1.10
+      - SPRING_DATA_REDIS_PORT=6379
+      # ⚠️ THAY ĐỔI IP THEO CÁC MÁY KHÁC
+      - FOOD_SERVICE_URL=http://192.168.1.11:8082
+      - USER_SERVICE_URL=http://192.168.1.10:8081
+      - PAYMENT_SERVICE_URL=http://localhost:8084
+    volumes:
+      - order-data:/data
+    restart: unless-stopped
+
+  # Payment Service - Port 8084
+  payment-service:
+    build:
+      context: ./Payment-Service
+      dockerfile: Dockerfile
+    container_name: payment-service
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:h2:file:/data/payment_sba_db;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1
+      # ⚠️ THAY ĐỔI IP THEO MÁY 1 (Redis)
+      - SPRING_DATA_REDIS_HOST=192.168.1.10
+      - SPRING_DATA_REDIS_PORT=6379
+      - ORDER_SERVICE_URL=http://localhost:8083
+    volumes:
+      - payment-data:/data
+    restart: unless-stopped
+    depends_on:
+      - order-service
+
+volumes:
+  order-data:
+  payment-data:

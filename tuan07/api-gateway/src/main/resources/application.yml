@@ -76,19 +76,15 @@ spring:
 #            payment-service:
 #              - uri: http://192.168.1.105:8084 # Thay bằng IP máy người số 5
 
-            # localhost:
+            # localhost or overridden by Docker variables:
             user-service:
-              - uri: http://localhost:8081 # Thay bằng IP máy người số 2
-              - uri: http://localhost:8085 # Bản clone test Round robin
-              # - uri: http://192.168.1.102:8081 # Bỏ comment dòng này nếu muốn test Round Robin (chạy 2 instance user-service)
+              - uri: ${USER_SERVICE_URL:http://localhost:8081}
             food-service:
-              - uri: http://localhost:8082 # Thay bằng IP máy người số 3
+              - uri: ${CATALOG_SERVICE_URL:http://localhost:8082}
             order-service:
-              - uri: http://localhost:8083 # Thay bằng IP máy người số 4
+              - uri: ${ORDER_SERVICE_URL:http://localhost:8083}
             payment-service:
-              - uri: http://localhost:8084 # Thay bằng IP máy người số 5
-
-
+              - uri: ${PAYMENT_SERVICE_URL:http://localhost:8084}
 
 # Cấu hình log để dễ debug khi làm việc nhóm
 logging:

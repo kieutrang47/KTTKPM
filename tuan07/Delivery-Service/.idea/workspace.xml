@@ -5,20 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7057f505-cb16-4fe7-a8c8-bddf955715c8" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitattributes" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.mvn/wrapper/maven-wrapper.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mvnw" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mvnw.cmd" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/shared_db/food_delivery_db.mv.db" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/iuh/fit/Delivery_Service/DeliveryController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/iuh/fit/Delivery_Service/DeliveryServiceApplication.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/iuh/fit/Delivery_Service/FoodOrder.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/iuh/fit/Delivery_Service/OrderRepository.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/shipper.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/iuh/fit/Delivery_Service/DeliveryServiceApplicationTests.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Order-Service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../Order-Service/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Order-Service/src/main/java/iuh/fit/Order_Service/KafkaConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Order-Service/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/../Order-Service/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Payment-Service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../Payment-Service/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Payment-Service/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/../Payment-Service/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../User-Service.zip" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../api-gateway/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/../api-gateway/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/Login.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/Login.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/Menu.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/Menu.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -55,25 +51,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RequestMappingsPanelOrder0": "0",
-    "RequestMappingsPanelOrder1": "1",
-    "RequestMappingsPanelWidth0": "75",
-    "RequestMappingsPanelWidth1": "75",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "Spring Boot.DeliveryServiceApplication.executor": "Run",
-    "git-widget-placeholder": "lehoan",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "F:/KienTrucvaTKPM/New folder/KTTKPM/tuan07/Payment-Service",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;Spring Boot.DeliveryServiceApplication.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;nguyenthikieutrang&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/trangnguyen/Downloads/hk2_4/TH_KTTKPM/tuan07/Delivery-Service&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="PaymentServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <module name="Payment-Service" />
@@ -86,8 +83,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9f38398b9061-39b83d9b5494-intellij.indexing.shared.core-IU-241.18034.62" />
-        <option value="bundled-js-predefined-1d06a55b98c1-0b3e54e931b4-JavaScript-IU-241.18034.62" />
+        <option value="bundled-jdk-9823dce3aa75-fdfe4dae3a2d-intellij.indexing.shared.core-IU-243.22562.218" />
+        <option value="bundled-js-predefined-d6986cc7102b-deb605915726-JavaScript-IU-243.22562.218" />
       </set>
     </attachedChunks>
   </component>
@@ -101,6 +98,8 @@
       <updated>1775720206444</updated>
       <workItem from="1775720207519" duration="2022000" />
       <workItem from="1775829087495" duration="287000" />
+      <workItem from="1775838569215" duration="622000" />
+      <workItem from="1776006548867" duration="19000" />
     </task>
     <servers />
   </component>

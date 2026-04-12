@@ -1,0 +1,14 @@
+version: "3.8"
+
+# MÁY C (Đảm nhận Thanh Toán đơn)
+services:
+  payment-service:
+    build: ../Payment-Service
+    container_name: payment-service
+    ports:
+      - "8084:8084"
+    environment:
+      # Trỏ về Máy A để dùng chung Redis
+      - SPRING_DATA_REDIS_HOST=${IP_MAY_A}
+      # Trỏ về Máy B để xác nhận Đơn Hàng
+      - ORDER_SERVICE_URL=http://${IP_MAY_B}:8083

@@ -69,13 +69,30 @@
         <tr>
             <th>ID Đơn</th>
             <th>Khách Hàng</th>
-            <th>Món</th>
+            <th>Món Ăn</th>
+            <th>Tổng Tiền</th>
             <th>Trạng Thái</th>
         </tr>
         <tr th:each="o : ${orders}">
             <td th:text="${'#' + o.id}" style="font-weight: bold; color: #2c3e50;"></td>
             <td th:text="${o.customerName}"></td>
-            <td th:text="${o.foodItem}"></td>
+            <td>
+                <!-- Hiển thị items nếu có -->
+                <div th:if="${o.items != null and !o.items.isEmpty()}">
+                    <div th:each="item : ${o.items}" style="font-size: 0.9em; margin: 2px 0;">
+                        <span th:text="${item.foodItem}"></span>
+                        <span th:text="${' x' + item.quantity}" style="color: #7f8c8d;"></span>
+                    </div>
+                </div>
+                <!-- Fallback cho orders cũ (không có items) -->
+                <div th:if="${o.items == null or o.items.isEmpty()}" style="color: #95a5a6; font-style: italic;">
+                    (Đơn hàng cũ)
+                </div>
+            </td>
+            <td>
+                <span th:if="${o.totalPrice != null}" th:text="${#numbers.formatDecimal(o.totalPrice, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}" style="font-weight: 600;"></span>
+                <span th:if="${o.totalPrice == null}" style="color: #95a5a6;">-</span>
+            </td>
             <td>
                 <span th:text="${o.status}"
                       th:style="${o.status == 'DELIVERING' ? 'background-color: #ffeaa7; color: #d35400; padding: 5px 10px; border-radius: 20px; font-size: 0.85em; font-weight: bold;' : 'background-color: #ecf0f1; color: #7f8c8d; padding: 5px 10px; border-radius: 20px; font-size: 0.85em; font-weight: bold;'}">

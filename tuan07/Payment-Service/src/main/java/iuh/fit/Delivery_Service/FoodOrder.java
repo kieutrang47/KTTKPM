@@ -1,20 +1,28 @@
 package iuh.fit.Delivery_Service;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "orders")
-
 public class FoodOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
     private String customerName;
-    private String foodItem;
-    private Double price;
-    private String status; // PAID, DELIVERING
+    
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<OrderItem> items = new ArrayList<>();
+    
+    private Double totalPrice;
+    private String status; // ORDERED, PAID, DELIVERING, COMPLETED
     private String paymentMethod; // COD, Banking
 
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -31,20 +39,21 @@ public class FoodOrder {
         this.customerName = customerName;
     }
 
-    public String getFoodItem() {
-        return foodItem;
+    public List<OrderItem> getItems() {
+        return items;
     }
 
-    public void setFoodItem(String foodItem) {
-        this.foodItem = foodItem;
+    public void setItems(List<OrderItem> items) {
+        this.items = items;
+        // Không set bidirectional ở đây, để controller xử lý
     }
 
-    public Double getPrice() {
-        return price;
+    public Double getTotalPrice() {
+        return totalPrice;
     }
 
-    public void setPrice(Double price) {
-        this.price = price;
+    public void setTotalPrice(Double totalPrice) {
+        this.totalPrice = totalPrice;
     }
 
     public String getStatus() {
@@ -61,5 +70,26 @@ public class FoodOrder {
 
     public void setPaymentMethod(String paymentMethod) {
         this.paymentMethod = paymentMethod;
+    }
+
+    // Backward compatibility
+    @Deprecated
+    public String getFoodItem() {
+        return items.isEmpty() ? null : items.get(0).getFoodItem();
+    }
+
+    @Deprecated
+    public void setFoodItem(String foodItem) {
+        // For backward compatibility
+    }
+
+    @Deprecated
+    public Double getPrice() {
+        return totalPrice;
+    }
+
+    @Deprecated
+    public void setPrice(Double price) {
+        // For backward compatibility
     }
 }
