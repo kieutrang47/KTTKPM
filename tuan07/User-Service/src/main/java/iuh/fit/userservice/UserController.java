@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-//@CrossOrigin(origins = "*") // Cho phép React gọi
+@CrossOrigin(origins = "*")
 @RequestMapping("/users")
 public class UserController {
 

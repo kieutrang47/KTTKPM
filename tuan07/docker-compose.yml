@@ -124,14 +124,14 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        - VITE_USER_API_URL=http://localhost:8081/users
+        - VITE_FOOD_API_URL=http://localhost:8082/foods
+        - VITE_ORDER_API_URL=http://localhost:8083/orders
+        - VITE_PAYMENT_API_URL=http://localhost:8084/payments
     container_name: frontend
     ports:
       - "3000:80"
-    environment:
-      - VITE_USER_API_URL=http://localhost:8081/users
-      - VITE_CATALOG_API_URL=http://localhost:8082/menu
-      - VITE_ORDER_API_URL=http://localhost:8083/orders
-      - VITE_PAYMENT_API_URL=http://localhost:8084/payments
     networks:
       - food-network
     depends_on:

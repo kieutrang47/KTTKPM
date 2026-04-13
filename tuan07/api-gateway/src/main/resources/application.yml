@@ -6,14 +6,6 @@ spring:
     name: api-gateway
   cloud:
     gateway:
-      # 1. CẤU HÌNH CORS CHO FRONTEND
-      globalcors:
-        corsConfigurations:
-          '[/**]':
-            allowedOrigins: "*" # Hoặc thay bằng IP máy Frontend (VD: http://192.168.1.100:3000)
-            allowedMethods: "*"
-            allowedHeaders: "*"
-
       routes:
         # 2. ROUTE CHO USER SERVICE
         - id: user-service
@@ -80,12 +72,14 @@ spring:
             user-service:
               - uri: ${USER_SERVICE_URL:http://172.20.37.19:8081}
             food-service:
-              - uri: ${CATALOG_SERVICE_URL:http://172.20.37.170:8082}
+              - uri: ${CATALOG_SERVICE_URL:http://172.20.36.105:8082}
             order-service:
-              - uri: ${ORDER_SERVICE_URL:http://172.20.36.105:8083}
+              - uri: ${ORDER_SERVICE_URL:http://172.20.37.170:8083}
             payment-service:
-              - uri: ${PAYMENT_SERVICE_URL:http://172.20.36.105:8084}
+              - uri: ${PAYMENT_SERVICE_URL:http://172.20.37.170:8084}
 
+#172.20.36.105
+#172.20.37.170
 # Cấu hình log để dễ debug khi làm việc nhóm
 logging:
   level:
