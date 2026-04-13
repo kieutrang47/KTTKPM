@@ -79,7 +79,7 @@ spring:
             # localhost:
             user-service:
               - uri: http://localhost:8081 # Thay bằng IP máy người số 2
-              - uri: http://localhost:8085 # Bản clone test Round robin
+#              - uri: http://localhost:8085 # Bản clone test Round robin
               # - uri: http://192.168.1.102:8081 # Bỏ comment dòng này nếu muốn test Round Robin (chạy 2 instance user-service)
             food-service:
               - uri: http://localhost:8082 # Thay bằng IP máy người số 3
