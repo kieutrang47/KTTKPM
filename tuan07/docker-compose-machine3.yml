@@ -14,12 +14,10 @@ services:
       - "8083:8083"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:h2:file:/data/order_sba_db;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1
-      # ⚠️ THAY ĐỔI IP THEO MÁY 1 (Redis)
-      - SPRING_DATA_REDIS_HOST=192.168.1.10
+      - SPRING_DATA_REDIS_HOST=${IP_MAY1}
       - SPRING_DATA_REDIS_PORT=6379
-      # ⚠️ THAY ĐỔI IP THEO CÁC MÁY KHÁC
-      - FOOD_SERVICE_URL=http://192.168.1.11:8082
-      - USER_SERVICE_URL=http://192.168.1.10:8081
+      - FOOD_SERVICE_URL=http://${IP_MAY2}:8082
+      - USER_SERVICE_URL=http://${IP_MAY1}:8081
       - PAYMENT_SERVICE_URL=http://localhost:8084
     volumes:
       - order-data:/data
@@ -35,8 +33,7 @@ services:
       - "8084:8084"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:h2:file:/data/payment_sba_db;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1
-      # ⚠️ THAY ĐỔI IP THEO MÁY 1 (Redis)
-      - SPRING_DATA_REDIS_HOST=192.168.1.10
+      - SPRING_DATA_REDIS_HOST=${IP_MAY1}
       - SPRING_DATA_REDIS_PORT=6379
       - ORDER_SERVICE_URL=http://localhost:8083
     volumes:

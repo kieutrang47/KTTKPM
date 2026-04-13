@@ -40,15 +40,14 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        - VITE_USER_API_URL=http://${IP_MAY1}:8081/users
+        - VITE_FOOD_API_URL=http://${IP_MAY2}:8082/menu
+        - VITE_ORDER_API_URL=http://${IP_MAY3}:8083/orders
+        - VITE_PAYMENT_API_URL=http://${IP_MAY3}:8084/payments
     container_name: frontend
     ports:
       - "3000:80"
-    environment:
-      # ⚠️ THAY ĐỔI IP THEO MÁY THỰC TẾ CỦA BẠN
-      - VITE_USER_API_URL=http://192.168.1.10:8081/users
-      - VITE_CATALOG_API_URL=http://192.168.1.11:8082/menu
-      - VITE_ORDER_API_URL=http://192.168.1.12:8083/orders
-      - VITE_PAYMENT_API_URL=http://192.168.1.12:8084/payments
     networks:
       - food-network
     restart: unless-stopped

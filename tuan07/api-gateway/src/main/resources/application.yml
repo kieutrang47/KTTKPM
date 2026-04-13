@@ -78,13 +78,13 @@ spring:
 
             # localhost or overridden by Docker variables:
             user-service:
-              - uri: ${USER_SERVICE_URL:http://localhost:8081}
+              - uri: ${USER_SERVICE_URL:http://172.20.37.19:8081}
             food-service:
-              - uri: ${CATALOG_SERVICE_URL:http://localhost:8082}
+              - uri: ${CATALOG_SERVICE_URL:http://172.20.37.170:8082}
             order-service:
-              - uri: ${ORDER_SERVICE_URL:http://localhost:8083}
+              - uri: ${ORDER_SERVICE_URL:http://172.20.36.105:8083}
             payment-service:
-              - uri: ${PAYMENT_SERVICE_URL:http://localhost:8084}
+              - uri: ${PAYMENT_SERVICE_URL:http://172.20.36.105:8084}
 
 # Cấu hình log để dễ debug khi làm việc nhóm
 logging:
